@@ -1,118 +1,154 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Chart } from 'chart.js/auto';
+import { FaCheckCircle } from 'react-icons/fa';
+
+function formatMetricName(key) {
+    return key
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, str => str.toUpperCase())
+        .replace(/Score$/, '');
+}
 
 function Charts({ selectedOperators }) {
     const radarChartRef = useRef(null);
-    const overallScoreChartRef = useRef(null);
 
     useEffect(() => {
-        if (radarChartRef.current && overallScoreChartRef.current) {
-            // Destroy existing charts
-            const existingRadarChart = Chart.getChart(radarChartRef.current);
-            if (existingRadarChart) {
-                existingRadarChart.destroy();
-            }
-            const existingOverallScoreChart = Chart.getChart(overallScoreChartRef.current);
-            if (existingOverallScoreChart) {
-                existingOverallScoreChart.destroy();
-            }
-
+        if (radarChartRef.current && selectedOperators.length > 0) {
             const radarCtx = radarChartRef.current.getContext('2d');
-            const overallScoreCtx = overallScoreChartRef.current.getContext('2d');
 
-            new Chart(radarCtx, {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.label}: ${context.raw.toFixed(1)}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                        ticks: {
+                            stepSize: 20,
+                            font: {
+                                size: 14
+                            },
+                            color: 'rgba(0, 0, 0, 0.7)'
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            color: 'rgba(0, 0, 0, 0.8)'
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        radius: 4,
+                        hoverRadius: 6
+                    },
+                    line: {
+                        tension: 0.2
+                    }
+                }
+            };
+
+            const radarChart = new Chart(radarCtx, {
                 type: 'radar',
                 data: {
-                    labels: ['Geographic', 'Network Diversity', 'Hardware Diversity', 'Software Diversity', 'Operator Diversity', 'Reputation', 'Censorship Resistance', 'Verified Operators', 'Economic Model', 'Cluster Size'],
+                    labels: [
+                        'Geographic Diversity',
+                        'Infrastructure Diversity',
+                        'Software Diversity',
+                        'Reputation',
+                        'Censorship Resistance',
+                        'Verified Operators',
+                        'Economic Model',
+                        'Fault Tolerance'
+                    ],
                     datasets: [{
-                        label: 'Cluster Analysis',
+                        label: 'Cluster Score',
                         data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        fill: true,
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgb(255, 99, 132)',
-                        pointBackgroundColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        pointBackgroundColor: 'rgba(75, 192, 192, 1)',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgb(255, 99, 132)'
+                        pointHoverBorderColor: 'rgba(75, 192, 192, 1)'
                     }]
                 },
                 options: {
-                    elements: {
-                        line: {
-                            borderWidth: 3
+                    ...chartOptions,
+                    scales: {
+                        r: {
+                            ...chartOptions.scales.r,
+                            angleLines: {
+                                display: false
+                            },
+                            ticks: {
+                                ...chartOptions.scales.r.ticks,
+                                stepSize: 20
+                            }
                         }
                     }
                 }
             });
 
-            new Chart(overallScoreCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Score', 'Remaining'],
-                    datasets: [{
-                        data: [0, 100],
-                        backgroundColor: ['rgba(75, 192, 192, 0.8)', 'rgba(201, 203, 207, 0.8)']
-                    }]
-                },
-                options: {
-                    cutout: '70%',
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            enabled: false
-                        }
-                    },
-                    plugins: [{
-                        id: 'centerText',
-                        afterDraw: (chart) => {
-                            const ctx = chart.ctx;
-                            const width = chart.width;
-                            const height = chart.height;
-                            ctx.restore();
-                            const fontSize = (height / 114).toFixed(2);
-                            ctx.font = fontSize + "em sans-serif";
-                            ctx.textBaseline = "middle";
-                            ctx.textAlign = "center";
-                            const text = chart.data.datasets[0].data[0].toFixed(2);
-                            const textX = width / 2;
-                            const textY = height / 2;
-                            ctx.fillText(text, textX, textY);
-                            ctx.save();
-                        }
-                    }]
-                }
-            });
+            return () => {
+                radarChart.destroy();
+            };
         }
     }, []);
 
     useEffect(() => {
-        if (radarChartRef.current && overallScoreChartRef.current && selectedOperators.length > 0) {
+        if (radarChartRef.current && selectedOperators.length > 0) {
             const radarChart = Chart.getChart(radarChartRef.current);
-            const overallScoreChart = Chart.getChart(overallScoreChartRef.current);
 
-            if (radarChart && overallScoreChart) {
+            if (radarChart) {
                 const scores = calculateScores(selectedOperators);
                 radarChart.data.datasets[0].data = Object.values(scores);
                 radarChart.update();
-
-                const overallScore = calculateOverallScore(scores);
-                overallScoreChart.data.datasets[0].data = [overallScore, 100 - overallScore];
-                overallScoreChart.update();
             }
         }
     }, [selectedOperators]);
 
     return (
-        <div className="charts-container" style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <div className="chart" style={{ width: '48%' }}>
-                <h2>Cluster Analysis</h2>
-                <canvas ref={radarChartRef}></canvas>
-            </div>
-            <div className="chart" style={{ width: '48%' }}>
-                <h2>Overall Score</h2>
-                <canvas ref={overallScoreChartRef}></canvas>
+        <div className="analysis-section-content">
+            <h2 className="section-title">Cluster Analysis</h2>
+            <div className="cluster-analysis-container">
+                <div className="radar-chart-wrapper">
+                    <canvas ref={radarChartRef}></canvas>
+                </div>
+                <div className="table-wrapper">
+                    <table className="cluster-analysis-table">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {selectedOperators.length > 0 && Object.entries(calculateScores(selectedOperators)).map(([key, value]) => (
+                                <tr key={key}>
+                                    <td>{formatMetricName(key)}</td>
+                                    <td>{value.toFixed(1)}%</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );
@@ -121,16 +157,19 @@ function Charts({ selectedOperators }) {
 function calculateScores(operators) {
     return {
         geographicScore: calculateGeographicScore(operators),
-        networkDiversityScore: calculateNetworkDiversityScore(operators),
-        hardwareDiversityScore: calculateHardwareDiversityScore(operators),
+        infrastructureDiversityScore: calculateInfrastructureDiversityScore(operators),
         softwareDiversityScore: calculateSoftwareDiversityScore(operators),
-        operatorDiversityScore: calculateOperatorDiversityScore(operators),
         reputationScore: calculateReputationScore(operators),
         censorshipResistanceScore: calculateCensorshipResistanceScore(operators),
         verifiedOperatorScore: calculateVerifiedOperatorScore(operators),
         economicModelScore: calculateEconomicModelScore(operators),
-        clusterSizeScore: calculateClusterSizeScore(operators.length)
+        faultToleranceScore: calculateFaultToleranceScore(operators.length)
     };
+}
+
+function calculateInfrastructureDiversityScore(operators) {
+    const uniqueProviders = new Set(operators.map(op => op.setup_provider));
+    return (uniqueProviders.size / operators.length) * 100;
 }
 
 function calculateGeographicScore(operators) {
@@ -158,7 +197,7 @@ function calculateSoftwareDiversityScore(operators) {
 }
 
 function calculateOperatorDiversityScore(operators) {
-    return Math.min(100, (operators.length / 10) * 100); // 假设10个操作员为满分
+    return Math.min(100, (operators.length / 10) * 100); // 假设10个作员为满分
 }
 
 function calculateReputationScore(operators) {
@@ -166,7 +205,10 @@ function calculateReputationScore(operators) {
 }
 
 function calculateCensorshipResistanceScore(operators) {
-    const avgMevRelays = operators.reduce((sum, op) => sum + op.mev_relays.length, 0) / operators.length;
+    const avgMevRelays = operators.reduce((score, op) => {
+        const relays = op.mev_relays ? (Array.isArray(op.mev_relays) ? op.mev_relays : op.mev_relays.split(',').map(relay => relay.trim())) : [];
+        return score + (relays.length > 0 ? 1 : 0);
+    }, 0);
     return Math.min(100, (avgMevRelays / 8) * 100); // 假设平均8个MEV中继为满分
 }
 
@@ -176,17 +218,31 @@ function calculateVerifiedOperatorScore(operators) {
 }
 
 function calculateEconomicModelScore(operators) {
-    const avgFee = operators.reduce((sum, op) => sum + parseInt(op.fee), 0) / operators.length;
-    return Math.min(100, (avgFee / 1e11) * 100); // 假设平均费用1e11 wei为满分
+    const fees = operators.map(op => parseInt(op.fee));
+    const avgFee = fees.reduce((sum, fee) => sum + fee, 0) / operators.length;
+    const feeVariance = fees.reduce((sum, fee) => sum + Math.pow(fee - avgFee, 2), 0) / operators.length;
+    const feeStandardDeviation = Math.sqrt(feeVariance);
+
+    // Normalize fee standard deviation (higher diversity is better, up to a point)
+    const feeDiversityScore = Math.min(100, (feeStandardDeviation / 1e10) * 100);
+
+    // Calculate fee reasonableness (closer to average is better)
+    const feeReasonablenessScore = 100 - Math.min(100, Math.abs(avgFee - 1e11) / 1e9);
+
+    // Combine diversity and reasonableness scores
+    return (feeDiversityScore * 0.5) + (feeReasonablenessScore * 0.5);
 }
 
-function calculateClusterSizeScore(clusterSize) {
-    return Math.min(100, (clusterSize / 10) * 100); // 假设10个操作员为满分
+function calculateFaultToleranceScore(clusterSize) {
+    // A cluster of 4 operators can tolerate 1 fault, 7 can tolerate 2, etc.
+    const faultTolerance = Math.floor((clusterSize - 1) / 3);
+    return Math.min(100, (faultTolerance / 3) * 100); // Assume 3 faults tolerated is optimal
 }
 
 function calculateOverallScore(scores) {
-    return Object.values(scores).reduce((sum, score) => sum + score, 0) / Object.keys(scores).length;
+    const scoreValues = Object.values(scores);
+    return scoreValues.reduce((sum, score) => sum + score, 0) / scoreValues.length;
 }
 
-export { calculateScores };
+export { calculateScores, calculateOverallScore };
 export default Charts;

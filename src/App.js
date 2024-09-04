@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Dashboard from './components/Dashboard';
 import ExistingValidatorForm from './components/ExistingValidatorForm';
 import NewValidatorForm from './components/NewValidatorForm';
@@ -11,9 +11,15 @@ function App() {
   const [mode, setMode] = useState(null);
   const [selectedOperators, setSelectedOperators] = useState([]);
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const analysisRef = useRef(null);
 
   const handleAnalyze = () => {
     setShowAnalysis(true);
+    setTimeout(() => {
+      if (analysisRef.current) {
+        analysisRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const renderContent = () => {
@@ -40,7 +46,7 @@ function App() {
           )}
         </div>
         {(mode === 'new' || showAnalysis) && selectedOperators.length > 0 && (
-          <Analysis selectedOperators={selectedOperators} isVisible={showAnalysis} />
+          <Analysis ref={analysisRef} selectedOperators={selectedOperators} isVisible={showAnalysis} />
         )}
       </div>
     );
