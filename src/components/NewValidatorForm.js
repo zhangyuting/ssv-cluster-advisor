@@ -80,7 +80,7 @@ function NewValidatorForm({ setSelectedOperators, onAnalyze }) {
                 </div>
               )}
               <p className="location">Location: <span className="highlight">{operator.location || 'N/A'}</span></p>
-              <p className="performance">Performance (24h): <span className="highlight">{operator.performance['24h'].toFixed(2)}%</span></p>
+              <p className="performance">Duty Performance (24h): <span className="highlight">{operator.performance['24h'].toFixed(2)}%</span></p>
               <p className="fee">Annual Fee: <span className="highlight">{((parseInt(operator.fee) * 365 * 24 * 60 * 5) / 1e18).toFixed(2)} SSV</span></p>
               <p className="validators">Validators: <span className="highlight">{operator.validators_count}</span></p>
               <p className="setup">Setup: <span className="highlight">{operator.setup_provider}</span></p>

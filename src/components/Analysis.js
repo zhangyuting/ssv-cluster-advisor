@@ -1,10 +1,12 @@
 import React from 'react';
 import Summary from './Summary';
 import Recommendations from './Recommendations';
-import Charts from './Charts';
+import Charts, { calculateScores } from './Charts';
 
 const Analysis = React.forwardRef(({ selectedOperators, isVisible }, ref) => {
   if (!isVisible) return null;
+
+  const scores = calculateScores(selectedOperators);
 
   return (
     <div ref={ref} className="analysis card">
@@ -14,7 +16,7 @@ const Analysis = React.forwardRef(({ selectedOperators, isVisible }, ref) => {
           <Summary selectedOperators={selectedOperators} />
         </div>
         <div className="analysis-item">
-          <Recommendations selectedOperators={selectedOperators} />
+          <Recommendations selectedOperators={selectedOperators} scores={scores} />
         </div>
         <div className="analysis-item">
           <Charts selectedOperators={selectedOperators} />

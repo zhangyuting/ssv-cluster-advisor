@@ -346,9 +346,11 @@ h2 {
 .cluster-analysis-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   gap: 40px;
   width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .radar-chart-wrapper {
@@ -365,21 +367,44 @@ h2 {
   max-width: 50%;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .cluster-analysis-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
-  margin-top: 0;
-  margin-bottom: 0;
 }
 
 .cluster-analysis-table th,
 .cluster-analysis-table td {
   border: 1px solid #ddd;
-  padding: 10px;
+  padding: 8px;
   text-align: left;
+}
+
+.cluster-analysis-table td:last-child {
+  text-align: right;
+  font-weight: bold;
+}
+
+.metric-container {
+  display: flex;
+  align-items: center;
+}
+
+.info-icon {
+  margin-left: 5px;
+  cursor: help;
+}
+
+.cluster-analysis-table .metric-container {
+  display: flex;
+  align-items: center;
+}
+
+.cluster-analysis-table .info-icon {
+  margin-left: 5px;
 }
 
 .cluster-analysis-table th {
@@ -442,4 +467,50 @@ h2 {
 
 .operators-table tr:hover {
   background-color: #f5f5f5;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.info-icon {
+  margin-left: 5px;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 300px;  /* Increased from 200px to 300px */
+  background-color: #555;
+  color: #fff;
+  text-align: left;  /* Changed from center to left for better readability */
+  border-radius: 6px;
+  padding: 10px;  /* Increased from 5px to 10px for better spacing */
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -150px;  /* Adjusted to half of the new width */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+.cluster-analysis-table td {
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.metric-container {
+  display: flex;
+  align-items: center;
+}
+
+.cluster-analysis-table td:last-child {
+  text-align: right;
+  font-weight: bold;
 }

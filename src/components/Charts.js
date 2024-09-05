@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Chart } from 'chart.js/auto';
-import { FaCheckCircle } from 'react-icons/fa';
+import { FaInfoCircle } from 'react-icons/fa';
 
 function formatMetricName(key) {
     return key
@@ -72,7 +72,7 @@ function Charts({ selectedOperators }) {
                         'Geographic Diversity',
                         'Infrastructure Diversity',
                         'Software Diversity',
-                        'Reputation',
+                        'Duty Performance',
                         'Censorship Resistance',
                         'Verified Operators',
                         'Economic Model',
@@ -142,8 +142,19 @@ function Charts({ selectedOperators }) {
                         <tbody>
                             {selectedOperators.length > 0 && Object.entries(calculateScores(selectedOperators)).map(([key, value]) => (
                                 <tr key={key}>
-                                    <td>{formatMetricName(key)}</td>
-                                    <td>{value.toFixed(1)}%</td>
+                                    <td>
+                                        <div className="metric-container">
+                                            {formatMetricName(key)}
+                                            <span className="tooltip">
+                                                <FaInfoCircle className="info-icon" />
+                                                <span className="tooltiptext">
+                                                    <strong>Description:</strong> {metricDescriptions[key].description}<br />
+                                                    <strong>Suggestion:</strong> {metricDescriptions[key].suggestion}
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td style={{ backgroundColor: getScoreColor(value) }}>{value.toFixed(1)}%</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -154,12 +165,47 @@ function Charts({ selectedOperators }) {
     );
 }
 
+const metricDescriptions = {
+    geographicScore: {
+        description: "Measures the diversity of operator locations.",
+        suggestion: "Select operators from different geographic regions to improve this score."
+    },
+    infrastructureDiversityScore: {
+        description: "Evaluates the variety of infrastructure providers used by operators.",
+        suggestion: "Choose operators using different infrastructure providers to enhance diversity."
+    },
+    softwareDiversityScore: {
+        description: "Assesses the diversity of Ethereum clients used by operators.",
+        suggestion: "Select operators using a mix of different Ethereum clients to increase resilience."
+    },
+    dutyPerformanceScore: {
+        description: "Reflects the average performance of operators in fulfilling their duties.",
+        suggestion: "Choose operators with high performance ratings to improve this score."
+    },
+    censorshipResistanceScore: {
+        description: "Measures the resistance to censorship based on MEV relay diversity.",
+        suggestion: "Select operators with diverse MEV relay connections to enhance censorship resistance."
+    },
+    verifiedOperatorScore: {
+        description: "Indicates the proportion of verified operators in your selection.",
+        suggestion: "Include more verified operators to increase trust and reliability."
+    },
+    economicModelScore: {
+        description: "Evaluates the balance and diversity of operator fees.",
+        suggestion: "Choose operators with a mix of fee structures to optimize this score."
+    },
+    faultToleranceScore: {
+        description: "Measures the cluster's ability to withstand operator failures.",
+        suggestion: "Increase the number of operators to improve fault tolerance."
+    }
+};
+
 function calculateScores(operators) {
     return {
         geographicScore: calculateGeographicScore(operators),
         infrastructureDiversityScore: calculateInfrastructureDiversityScore(operators),
         softwareDiversityScore: calculateSoftwareDiversityScore(operators),
-        reputationScore: calculateReputationScore(operators),
+        dutyPerformanceScore: calculateDutyPerformanceScore(operators),
         censorshipResistanceScore: calculateCensorshipResistanceScore(operators),
         verifiedOperatorScore: calculateVerifiedOperatorScore(operators),
         economicModelScore: calculateEconomicModelScore(operators),
@@ -200,7 +246,7 @@ function calculateOperatorDiversityScore(operators) {
     return Math.min(100, (operators.length / 10) * 100); // 假设10个作员为满分
 }
 
-function calculateReputationScore(operators) {
+function calculateDutyPerformanceScore(operators) {
     return operators.reduce((sum, op) => sum + op.performance['24h'], 0) / operators.length;
 }
 
@@ -242,6 +288,13 @@ function calculateFaultToleranceScore(clusterSize) {
 function calculateOverallScore(scores) {
     const scoreValues = Object.values(scores);
     return scoreValues.reduce((sum, score) => sum + score, 0) / scoreValues.length;
+}
+
+function getScoreColor(score) {
+    if (score >= 80) return 'rgba(0, 255, 0, 0.1)'; // Light green for high scores
+    if (score >= 60) return 'rgba(255, 255, 0, 0.1)'; // Light yellow for medium scores
+    if (score >= 40) return 'rgba(255, 165, 0, 0.1)'; // Light orange for low scores
+    return 'rgba(255, 0, 0, 0.1)'; // Light red for very low scores
 }
 
 export { calculateScores, calculateOverallScore };

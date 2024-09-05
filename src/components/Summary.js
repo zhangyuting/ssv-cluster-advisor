@@ -18,21 +18,25 @@ function Summary({ selectedOperators }) {
         <table className="operators-table">
           <thead>
             <tr>
+              <th>#</th>
               <th>Operator</th>
               <th>Location</th>
               <th>Setup Provider</th>
               <th>Clients (ETH1/ETH2)</th>
               <th>MEV Relays</th>
+              <th>Annual Fee</th>
             </tr>
           </thead>
           <tbody>
-            {selectedOperators.map(operator => (
+            {selectedOperators.map((operator, index) => (
               <tr key={operator.id}>
+                <td>{index + 1}</td>
                 <td>{operator.name}</td>
                 <td>{operator.location}</td>
                 <td>{operator.setup_provider}</td>
                 <td>{`${operator.eth1_node_client}/${operator.eth2_node_client}`}</td>
                 <td>{Array.isArray(operator.mev_relays) ? operator.mev_relays.join(', ') : (operator.mev_relays || 'N/A')}</td>
+                <td>{`${((parseInt(operator.fee) * 365 * 24 * 60 * 5) / 1e18).toFixed(2)} SSV`}</td>
               </tr>
             ))}
           </tbody>
