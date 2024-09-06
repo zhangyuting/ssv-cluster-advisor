@@ -135,7 +135,7 @@ function Charts({ selectedOperators }) {
                     <table className="cluster-analysis-table">
                         <thead>
                             <tr>
-                                <th>Metric</th>
+                                <th>Diversity Metrics</th>
                                 <th>Score</th>
                             </tr>
                         </thead>
