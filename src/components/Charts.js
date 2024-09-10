@@ -243,7 +243,7 @@ function calculateSoftwareDiversityScore(operators) {
 }
 
 function calculateOperatorDiversityScore(operators) {
-    return Math.min(100, (operators.length / 10) * 100); // 假设10个作员为满分
+    return Math.min(100, (operators.length / 13) * 100); // 假设13个作员为满分
 }
 
 function calculateDutyPerformanceScore(operators) {

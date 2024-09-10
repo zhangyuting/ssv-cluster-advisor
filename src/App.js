@@ -54,7 +54,7 @@ function App() {
 
   return (
     <div className="container">
-      <h1>SSV Cluster Advisor</h1>
+      <h1>DiverseStake - SSV Cluster Advisor</h1>
       <Introduction />
       <Dashboard />
       {renderContent()}
